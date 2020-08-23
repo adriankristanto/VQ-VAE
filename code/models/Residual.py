@@ -39,7 +39,6 @@ class ResidualBlock(nn.Module):
         out += x
         # each residual block doesn't wrap (res_x + x) with an activation function
         # as the next block implement ReLU as the first layer
-        # the ResidualStack will wrap the output of the final residual block in an activation function
         return out
 
 
