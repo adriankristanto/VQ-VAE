@@ -26,11 +26,11 @@ class ResidualBlock(nn.Module):
             # NOTE: in == out == n
             # padding = (s(n - 1) - n + f) / 2
             # ((n - 1) -n + 3) / 2 = 1
-            nn.Conv2d(in_channels=in_channels, out_channels=res_channels, kernel_size=(3, 3), stride=1, padding=1, bias=False),
+            nn.Conv2d(in_channels=in_channels, out_channels=res_channels, kernel_size=(3, 3), stride=1, padding=1),
             nn.ReLU(),
             # padding = (s(out - 1) - n + f) / 2
             # ((n - 1) -n + 1) / 2 = 0
-            nn.Conv2d(in_channels=res_channels, out_channels=hidden_channels, kernel_size=(1, 1), stride=1, padding=0, bias=False)
+            nn.Conv2d(in_channels=res_channels, out_channels=hidden_channels, kernel_size=(1, 1), stride=1, padding=0)
         )
         return resblock
 
