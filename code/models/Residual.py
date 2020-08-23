@@ -41,3 +41,8 @@ class ResidualBlock(nn.Module):
         # as the next block implement ReLU as the first layer
         # the ResidualStack will wrap the output of the final residual block in an activation function
         return out
+
+
+if __name__ == "__main__":
+    net = ResidualBlock(3, 32, 128)
+    print(net)
