@@ -13,9 +13,11 @@ class Decoder(nn.Module):
 
     def __init__(self, in_channels, hidden_channels, num_resblocks, res_channels, out_channels):
         """
-            in_channels: the number of channels that the input image has
+            in_channels: the number of channels that are used by the input layer
             hidden_channels: the number of channels that are used by the hidden conv layers
+            num_resblocks: the number of residual blocks used in the encoder
             res_channels: the number of channels that are used by the residual blocks
+            out_channels: the number of channels that are used by the output layer, should be the same to the number of the input image channels
         """
         super(Decoder, self).__init__()
         self.layers = self._build(in_channels, hidden_channels, num_resblocks, res_channels, out_channels)

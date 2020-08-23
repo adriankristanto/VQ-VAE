@@ -16,6 +16,7 @@ class Encoder(nn.Module):
         """
             in_channels: the number of channels that the input image has
             hidden_channels: the number of channels that are used by the hidden conv layers
+            num_resblocks: the number of residual blocks used in the encoder
             res_channels: the number of channels that are used by the residual blocks
         """
         super(Encoder, self).__init__()
@@ -59,7 +60,7 @@ class Encoder(nn.Module):
 if __name__ == "__main__":
     net = Encoder(3, 128, 2, 32)
     print(net)
-    
+
     sample = torch.randn((1, 3, 128, 128))
     output = net(sample)
     print(output.shape)
