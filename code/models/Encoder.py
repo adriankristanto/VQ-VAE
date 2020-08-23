@@ -30,6 +30,9 @@ class Encoder(nn.Module):
         layers += [
             ResidualBlock(hidden_channels, res_channels, hidden_channels) for _ in range(num_resblocks)
         ]
+        layers += [
+            nn.ReLU()
+        ]
         return nn.Sequential(*layers)
 
     def forward(self, x):
