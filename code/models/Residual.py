@@ -10,6 +10,15 @@ class ResidualBlock(nn.Module):
     """
 
     def __init__(self, channels):
+        """
+        channels: array of length 3, which contains the in_channels, num_residual_hiddens, and num_hiddens
+            where 
+                1. in_channels is the number of input channels to the first conv layer, 
+                2. num_residual_hiddens is the number of output channels of the first conv layer 
+                    and the number of input channels to the second conv layer
+                3. num_hiddens is the number of output channels of the second conv layer.
+
+        """
         super(ResidualBlock, self).__init__()
         self.resblock = self._build(channels)
     
@@ -31,4 +40,7 @@ class ResidualBlock(nn.Module):
     def forward(self, x):
         res_x = self.resblock(x)
         x += res_x
+        # each residual block doesn't wrap (res_x + x) with an activation function
+        # as the next block implement ReLU as the first layer
+        # the ResidualStack will wrap the output of the final residual block in an activation function
         return x
