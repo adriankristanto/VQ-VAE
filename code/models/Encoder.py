@@ -59,3 +59,7 @@ class Encoder(nn.Module):
 if __name__ == "__main__":
     net = Encoder(3, 128, 2, 32)
     print(net)
+    
+    sample = torch.randn((1, 3, 128, 128))
+    output = net(sample)
+    print(output.shape)
