@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn 
 
+# reference: https://github.com/deepmind/sonnet/blob/master/sonnet/examples/vqvae_example.ipynb
+
 class ResidualBlock(nn.Module):
 
     """

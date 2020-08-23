@@ -9,7 +9,6 @@ class Encoder(nn.Module):
     with stride 2 and kernel size (4, 4), followed by two residual 3 × 3 blocks.
     However, the author added a Conv layer in between the strided convolutional layers and the resblock
     with kernel size = (3, 3) and stride = 1.
-    reference: https://github.com/deepmind/sonnet/blob/master/sonnet/examples/vqvae_example.ipynb
     """
 
     def __init__(self, in_channels, hidden_channels, num_resblocks, res_channels):

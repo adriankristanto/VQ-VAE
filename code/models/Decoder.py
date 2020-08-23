@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 from Residual import ResidualBlock
 
+# reference: https://github.com/deepmind/sonnet/blob/master/sonnet/examples/vqvae_example.ipynb
+
 class Decoder(nn.Module):
 
     """
