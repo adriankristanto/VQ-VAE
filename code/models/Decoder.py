@@ -33,7 +33,7 @@ class Decoder(nn.Module):
         ]
         layers += [
             # here, we create num_resblocks number of residual blocks
-            Residual(hidden_channels, res_channels, hidden_channels) for _ in range(num_resblocks)
+            ResidualBlock(hidden_channels, res_channels, hidden_channels) for _ in range(num_resblocks)
         ]
         layers += [
             # each resblock output is not wrapped by the activation function as the next block has ReLU as its first layer
@@ -56,3 +56,12 @@ class Decoder(nn.Module):
     def forward(self, x):
         x = self.layers(x)
         return x
+
+
+if __name__ == "__main__":
+    net = Decoder(128, 128, 2, 32, 3)
+    print(net)
+
+    sample = torch.randn((1, 128, 32, 32))
+    output = net(sample)
+    print(output.shape)
