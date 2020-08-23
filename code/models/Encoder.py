@@ -16,7 +16,7 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         self.layers = self._build(in_channels, hidden_channels, num_resblocks, res_channels)
     
-    def __build(self, in_channels, hidden_channels, num_resblocks, res_channels):
+    def _build(self, in_channels, hidden_channels, num_resblocks, res_channels):
         layers = [
             nn.Conv2d(in_channels=in_channels, out_channels=hidden_channels // 2, kernel_size=4, stride=2, padding=1),
             nn.ReLU(),
@@ -35,3 +35,8 @@ class Encoder(nn.Module):
     def forward(self, x):
         x = self.layers(x)
         return x
+
+
+if __name__ == "__main__":
+    net = Encoder(3, 128, 2, 32)
+    print(net)
