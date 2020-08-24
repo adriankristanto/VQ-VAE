@@ -19,14 +19,17 @@ class VectorQuantizerEMA(nn.Module):
         2. Additionally, using this method results in faster training.
     """
 
-    def __init__(self, D, K, beta, gamma, epsilon):
+    def __init__(self, D, K, beta=0.25, gamma=0.99, epsilon=1e-5):
         """
         According to the paper,
             D: dimensionality of each embedding vector, or embedding_dim in the sonnet's implementation
             K: the size of the discrete space (the number of embedding vectors), or num_embeddings in the sonnet's implementation
             beta: the hyperparameter that acts as a weighting to the lost term, or commitment_cost in the sonnet's implementation
+                recommendation from the paper, beta=0.25
             gamma: controls the speed of the EMA, or decay in the sonnet's implementation
+                recommendation from the paper, gamma=0.99
             epsilon: to avoid numerical instability (such as division by zero)
+                from the original implementation, epsilon=1e-5
         """
         super(VectorQuantizerEMA, self).__init__()
         # assign the parameters to self
@@ -41,7 +44,7 @@ class VectorQuantizerEMA(nn.Module):
         # the above implementation return the latent loss without multiplying it with beta
         # it only multiplies the latent loss with beta during training
         # the original sonnet implementation, however, multiplied the latent loss with beta during the forward pass
-        
+
         self.beta = beta
         self.gamma = gamma
         self.epsilon = epsilon
