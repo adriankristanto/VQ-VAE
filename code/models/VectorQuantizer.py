@@ -32,6 +32,16 @@ class VectorQuantizerEMA(nn.Module):
         # assign the parameters to self
         self.D = D
         self.K = K
+        # in this implementation, the loss will be multiplied by beta during the forward pass of the VQ layer
+        # instead of during training
+        # so that, during training, we can simply add up the latent loss and the reconstruction loss
+        # without having to multiply to latent loss with beta
+
+        # reference: https://github.com/rosinality/vq-vae-2-pytorch/blob/master/vqvae.py
+        # the above implementation return the latent loss without multiplying it with beta
+        # it only multiplies the latent loss with beta during training
+        # the original sonnet implementation, however, multiplied the latent loss with beta during the forward pass
+        
         self.beta = beta
         self.gamma = gamma
         self.epsilon = epsilon
