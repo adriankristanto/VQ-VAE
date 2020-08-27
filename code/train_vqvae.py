@@ -25,6 +25,6 @@ if 'logs' not in os.listdir(MAIN_DIR):
 if 'reconstructed_images' not in os.listdir(MAIN_DIR):
     print('creating reconstructed_images directory...', flush=True)
     os.mkdir(MAIN_DIR + 'reconstructed_images')
-if 'c' not in os.listdir(MAIN_DIR):
+if 'saved_models' not in os.listdir(MAIN_DIR):
     print('creating saved_models directory...', flush=True)
     os.mkdir(MAIN_DIR + 'saved_models')
