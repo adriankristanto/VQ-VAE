@@ -51,4 +51,6 @@ class VQVAE(nn.Module):
 if __name__ == "__main__":
     net = VQVAE(3, 128, 2, 32, 64, 512)
     x = torch.randn((1, 3, 128, 128))
-    net(x)
+    outputs = net(x)
+    print(outputs[0].shape)
+    print(outputs[3].shape)
