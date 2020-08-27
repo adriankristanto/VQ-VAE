@@ -140,6 +140,19 @@ class VectorQuantizerEMA(nn.Module):
             # essentially, the following is the new, unnormalised value of a specific embedding vector
             self.embed_avg = self.embed_avg * self.gamma + (1 - self.gamma) * torch.matmul(x_flatten.transpose(0, 1), encodings)
 
+            # according to https://github.com/zalandoresearch/pytorch-vq-vae/blob/master/vq-vae.ipynb
+            # the following is the laplace smoothing of the cluster size
+            # which I believe is to remove the occurence of 0 in the cluster size
+            n = self.cluster_size.sum()
+            cluster_size = (
+                (self.cluster_size + self.epsilon) / (n + self.K * self.epsilon) * n
+            )
+            
+            # final update: the weights of the embedding layers
+            self.embedding = self.embed_avg / cluster_size
+            # print(self.embed_avg.shape) # torch.Size([64, 512])
+            # print(cluster_size.shape) # torch.Size([512])
+
         return x
 
 if __name__ == "__main__":
