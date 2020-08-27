@@ -123,6 +123,7 @@ class VectorQuantizerEMA(nn.Module):
             # the first one is N, or the cluster size
             # NOTE: in the paper, n_i^(t) is the number of input vectors that are quantized into a specific 
             # embedding vector
+            # essentially, the following is the number of input vectors represented by a specific embedding vector
             self.cluster_size = self.cluster_size * self.gamma + (1 - self.gamma) * torch.sum(encodings, dim=0)
             # print(torch.sum(encodings, dim=0).shape) # torch.Size([512])
             # torch.sum(encodings, dim=0) means how many input vectors correspond to each index out of 512
@@ -130,6 +131,14 @@ class VectorQuantizerEMA(nn.Module):
             # represented by the second embedding vector
 
             # the second update is m
+            # print(x_flatten.transpose(0, 1).shape) # torch.Size([64, 16384])
+            # the output shape: (D, K)
+            # I think here, we get the value for each of the 512 vectors for the corresponding vector update
+            # i.e. column 1 will be used to update the weight of the embedding layer in column 1
+            # however, this has not been normalised yet by the number of input vectors that is represented by the 
+            # aforementioned embedding vector
+            # essentially, the following is the new, unnormalised value of a specific embedding vector
+            self.embed_avg = self.embed_avg * self.gamma + (1 - self.gamma) * torch.matmul(x_flatten.transpose(0, 1), encodings)
 
         return x
 
