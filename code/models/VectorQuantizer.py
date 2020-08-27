@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn 
+import torch.nn.functional as F
 
 # Sonnet's implementation: https://github.com/deepmind/sonnet/blob/v2/sonnet/src/nets/vqvae.py
 # Other references:
@@ -60,7 +61,7 @@ class VectorQuantizerEMA(nn.Module):
         # will be reshaped to (16 * 32 * 32, 64)
         # which means we have 16 * 32 * 32 tensors of 64 dimensions
         # 64 here is the input parameter D in our implementation
-        x = x.view(-1, self.D)
+        x_flatten = x.view(-1, self.D)
 
         return x
 
