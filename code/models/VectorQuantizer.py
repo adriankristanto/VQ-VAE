@@ -47,7 +47,7 @@ class VectorQuantizerEMA(nn.Module):
         self.beta = beta
         self.gamma = gamma
         self.epsilon = epsilon
-        
+
     def forward(self, x):
         # note: pytorch data shape == (batch size, channel, height, width)
         # here, we change the shape into (batc size, height, width, channel)
@@ -61,6 +61,7 @@ class VectorQuantizerEMA(nn.Module):
         # which means we have 16 * 32 * 32 tensors of 64 dimensions
         # 64 here is the input parameter D in our implementation
         x = x.view(-1, self.D)
+
         return x
 
 if __name__ == "__main__":
