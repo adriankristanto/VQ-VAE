@@ -44,8 +44,20 @@ class VectorQuantizerEMA(nn.Module):
         # the above implementation return the latent loss without multiplying it with beta
         # it only multiplies the latent loss with beta during training
         # the original sonnet implementation, however, multiplied the latent loss with beta during the forward pass
-
         self.beta = beta
         self.gamma = gamma
         self.epsilon = epsilon
-        
+    
+    def forward(self, x):
+        # firstly, flatten all other dimension except for the last one
+        # for example, in the sonnet documentation, input tensor of shape (16, 32, 32, 64)
+        # will be reshaped to (16 * 32 * 32, 64)
+        # which means we have 16 * 32 * 32 tensors of 64 dimensions
+        # 64 here is the input parameter D in our implementation
+        x = x.view(-1, self.D)
+        return x
+
+if __name__ == "__main__":
+    tensor = torch.randn((16, 32, 32, 64))
+    net = VectorQuantizerEMA(tensor.shape[3], tensor.shape[0] * tensor.shape[1] * tensor.shape[2])
+    print(net(tensor).shape)
