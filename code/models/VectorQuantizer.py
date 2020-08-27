@@ -153,7 +153,23 @@ class VectorQuantizerEMA(nn.Module):
             # print(self.embed_avg.shape) # torch.Size([64, 512])
             # print(cluster_size.shape) # torch.Size([512])
 
-        return x
+        # in the paper, the following is the third loss term that needs to be optimized by the encoder
+        # beta * (x - stop_gradient(embedding)) ** 2
+        loss = self.beta * torch.mean((x - quantized.detach()) ** 2)
+
+        # the following is the straigh-through estimator
+        # where the gradients from the decoder input are copied to the encoder output
+        quantized = x + (quantized - x).detach()
+
+        # formula to compute perplexity according to the original implementation:
+        avg_probs = torch.mean(encodings, dim=0)
+        perplexity = torch.exp(
+            -torch.sum(avg_probs * torch.log(avg_probs + 1e-10))
+        )
+
+        # the original sonnet implementation returns :
+        # quantized, loss, perplexity, encodings, encodings_indices and the distances
+        return quantized, loss, perplexity, encodings, nearest_embedding_ids, distance
 
 if __name__ == "__main__":
     tensor = torch.randn((16, 64, 32, 32))
