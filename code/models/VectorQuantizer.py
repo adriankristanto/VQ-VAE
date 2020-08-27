@@ -169,10 +169,21 @@ class VectorQuantizerEMA(nn.Module):
 
         # the original sonnet implementation returns :
         # quantized, loss, perplexity, encodings, encodings_indices and the distances
-        return quantized, loss, perplexity, encodings, nearest_embedding_ids, distance
+        return (
+            # the output is of shape (batch size, height, width, channel)
+            # change it to (batch size, channel, height, width), which is what pytorch uses
+            quantized.permute(0, 3, 1, 2).contiguous(), 
+            loss, 
+            perplexity, 
+            encodings, 
+            # reshaped following the original implementation
+            # e.g. from 16384 to (16, 32, 32)
+            nearest_embedding_ids.view(*x.shape[:-1]), 
+            distance
+        )
 
 if __name__ == "__main__":
     tensor = torch.randn((16, 64, 32, 32))
     net = VectorQuantizerEMA(D=64, K=512)
-    net(tensor)
-    # print(net(tensor).shape)
+    print(net)
+    print(net(tensor)[0].shape)
