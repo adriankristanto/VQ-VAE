@@ -6,6 +6,7 @@ import torch.nn.functional as F
 # Other references:
 # https://github.com/zalandoresearch/pytorch-vq-vae/blob/master/vq-vae.ipynb
 # https://github.com/rosinality/vq-vae-2-pytorch/blob/master/vqvae.py
+# NOTE: this implementation follows https://github.com/rosinality/vq-vae-2-pytorch/blob/master/vqvae.py closely
 
 class VectorQuantizerEMA(nn.Module):
 
@@ -48,6 +49,18 @@ class VectorQuantizerEMA(nn.Module):
         self.beta = beta
         self.gamma = gamma
         self.epsilon = epsilon
+
+        # create the embedding layer's weights
+        # initialise the weights using randn
+        embedding_init = torch.randn(D, K)
+        # why use register_buffer? because we want to save the embedding weights, etc. into saved state
+        # for training continuation
+        # why not use nn.Embedding or register_parameter? here, we update the weights using EMA instead of the traditional update
+        self.register_buffer("embedding", embedding_init)
+
+        # the followings are required for the EMA computation and the weights update
+        self.register_buffer("cluster_size", torch.zeros(K))
+        self.register_buffer("embed_avg", embedding_init.clone())
 
     def forward(self, x):
         # note: pytorch data shape == (batch size, channel, height, width)
