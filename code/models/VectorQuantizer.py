@@ -47,9 +47,15 @@ class VectorQuantizerEMA(nn.Module):
         self.beta = beta
         self.gamma = gamma
         self.epsilon = epsilon
-    
+        
     def forward(self, x):
-        # firstly, flatten all other dimension except for the last one
+        # note: pytorch data shape == (batch size, channel, height, width)
+        # here, we change the shape into (batc size, height, width, channel)
+        # this is to make the shape follows the requirement of the next step
+        x = x.permute(0, 2, 3, 1).contiguous()
+        # note: contiguous() needs to be called after permute. Otherwise, the following view() will return an error
+        
+        # firstly, flatten all other dimension except for the last one (the channels dimension)
         # for example, in the sonnet documentation, input tensor of shape (16, 32, 32, 64)
         # will be reshaped to (16 * 32 * 32, 64)
         # which means we have 16 * 32 * 32 tensors of 64 dimensions
@@ -58,6 +64,7 @@ class VectorQuantizerEMA(nn.Module):
         return x
 
 if __name__ == "__main__":
-    tensor = torch.randn((16, 32, 32, 64))
-    net = VectorQuantizerEMA(tensor.shape[3], tensor.shape[0] * tensor.shape[1] * tensor.shape[2])
-    print(net(tensor).shape)
+    tensor = torch.randn((16, 64, 32, 32))
+    net = VectorQuantizerEMA(D=64, K=512)
+    net(tensor)
+    # print(net(tensor).shape)
