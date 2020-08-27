@@ -115,6 +115,22 @@ class VectorQuantizerEMA(nn.Module):
         encodings = F.one_hot(nearest_embedding_ids, num_classes=self.K).type(x_flatten.dtype)
         # print(encodings.shape) # torch.Size([16384, 512])
 
+        # if currently training, update the weights via EMA calculation
+        # according to the paper, there are 3 items that we need to update
+        # NOTE: the EMA formula is 
+        # gamma * previous_term + (1 - gamma) * the current term
+        if self.training:
+            # the first one is N, or the cluster size
+            # NOTE: in the paper, n_i^(t) is the number of input vectors that are quantized into a specific 
+            # embedding vector
+            self.cluster_size = self.cluster_size * self.gamma + (1 - self.gamma) * torch.sum(encodings, dim=0)
+            # print(torch.sum(encodings, dim=0).shape) # torch.Size([512])
+            # torch.sum(encodings, dim=0) means how many input vectors correspond to each index out of 512
+            # for example, if the second entry is 32, this means that out of 16384 input vectors, 32 of them are
+            # represented by the second embedding vector
+
+            # the second update is m
+
         return x
 
 if __name__ == "__main__":
