@@ -76,6 +76,21 @@ class VectorQuantizerEMA(nn.Module):
         # 64 here is the input parameter D in our implementation
         x_flatten = x.view(-1, self.D)
 
+        # get the nearest embedding
+        # by computing the distance between the encoder output and all embedding vector using the following formula
+        # (z_ex - e_j)**2
+        # where z_ex is the input/the encoding output and e_j is the embedding vector j
+        # print(x_flatten.shape) # torch.Size([16384, 64])
+        # print(self.embedding.shape) # torch.Size([64, 512])
+        distance = (
+            torch.sum(x_flatten ** 2, dim=1, keepdim=True) + # shape: torch.Size([16384, 1])
+            torch.sum(self.embedding ** 2, dim=0, keepdim=True) - # shape: torch.Size([1, 512])
+            # torch.Size([16384, 1]) + torch.Size([1, 512]), using python broadcasting: torch.Size([16384, 512]) + torch.Size([16384, 512])
+            2 * torch.matmul(x_flatten, self.embedding) # shape: torch.Size([16384, 512])
+        )
+        # print(distance.shape) # torch.Size([16384, 512])
+        # compute the distance between each of the 16384 input vector and 512 embedding vectors
+
         return x
 
 if __name__ == "__main__":
