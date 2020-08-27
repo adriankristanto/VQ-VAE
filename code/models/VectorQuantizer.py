@@ -91,6 +91,11 @@ class VectorQuantizerEMA(nn.Module):
         # print(distance.shape) # torch.Size([16384, 512])
         # compute the distance between each of the 16384 input vector and 512 embedding vectors
 
+        # for each of 16384 input vectors of size D, get the minimum distance
+        # thus, out of K embedding vectors, choose 1 that gives us the minimum distance
+        nearest_embedding = torch.argmin(distance, dim=1)
+        # print(nearest_embedding.shape) # torch.Size([16384])
+
         return x
 
 if __name__ == "__main__":
