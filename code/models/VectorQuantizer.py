@@ -61,6 +61,12 @@ class VectorQuantizerEMA(nn.Module):
         # the followings are required for the EMA computation and the weights update
         self.register_buffer("cluster_size", torch.zeros(K))
         self.register_buffer("embed_avg", embedding_init.clone())
+    
+    def quantize(self, encoding_indices):
+        # since we created the embedding weights of shape (D, K), we need to transpose it to (K, D)
+        # this is because nn.Embedding uses dimension (K, D)
+        # .transpose(0, 1) will swap the first 2 dimension
+        return F.embedding(encoding_indices, self.embedding.transpose(0, 1))
 
     def forward(self, x):
         # note: pytorch data shape == (batch size, channel, height, width)
