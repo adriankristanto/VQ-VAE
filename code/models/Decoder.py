@@ -20,7 +20,7 @@ class Decoder(nn.Module):
         """
             in_channels: the number of channels that are used by the input layer
             hidden_channels: the number of channels that are used by the hidden conv layers
-            num_resblocks: the number of residual blocks used in the encoder
+            num_resblocks: the number of residual blocks used in the decoder
             res_channels: the number of channels that are used by the residual blocks
             out_channels: the number of channels that are used by the output layer, should be the same to the number of the input image channels
         """
