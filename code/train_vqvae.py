@@ -140,7 +140,8 @@ for epoch in range(next_epoch, EPOCH):
     sampling = True
     with torch.no_grad():
         outputs, _, _, _ = net(sample)
-        torchvision.utils.save_image(outputs, RECONSTRUCTED_DIRPATH)
+        torchvision.utils.save_image(sample, RECONSTRUCTED_DIRPATH + f'vqvae_real_{epoch+1}.png')
+        torchvision.utils.save_image(outputs, RECONSTRUCTED_DIRPATH + f'vqvae_reconstructed_{epoch+1}.png')
     
     # save the model
     if (epoch + 1) % SAVE_INTERVAL == 0:
