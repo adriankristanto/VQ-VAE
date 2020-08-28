@@ -33,7 +33,7 @@ if 'saved_models' not in os.listdir(MAIN_DIR):
 # 1. load the data
 # reference: https://github.com/jpowie01/DCGAN_CelebA/blob/master/dataset.py
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../data/'
-BATCH_SIZE = 1
+BATCH_SIZE = 128
 
 train_transform = transforms.Compose([
     # make image h == image w
