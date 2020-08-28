@@ -121,6 +121,8 @@ for epoch in range(next_epoch, EPOCH):
         outputs, commitment_loss, _, _ = net(inputs)
         # 3. compute loss
         # note: the commitment loss has been multiplied by beta in the vq layer
+        if multigpu:
+            commitment_loss = torch.mean(commitment_loss)
         loss = reconstruction_loss(outputs, inputs) + commitment_loss
         # 4. backward propagation
         loss.backward()
