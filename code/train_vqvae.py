@@ -92,6 +92,8 @@ CONTINUE_TRAIN = False
 CONTINUE_TRAIN_NAME = MODEL_DIRPATH + 'vqvae-model-epoch10.pth'
 EPOCH = 50
 SAVE_INTERVAL = 5
+# for reconstruction test
+RECONSTRUCTION_SIZE = 64
 
 next_epoch = 0
 if CONTINUE_TRAIN:
@@ -99,3 +101,54 @@ if CONTINUE_TRAIN:
     net.load_state_dict(checkpoint.get('net_state_dict'))
     optimizer.load_state_dict(checkpoint.get('optimizer_state_dict'))
     next_epoch = checkpoint.get('epoch')
+
+# training loop
+for epoch in range(next_epoch, EPOCH):
+    running_loss = 0.0
+    n = 0
+
+    sample = None
+    sampling = True
+
+    net.train()
+    for train_data in tqdm(trainloader, desc=f'Epoch {epoch + 1}/{EPOCH}'):
+        inputs = train_data[0].to(device)
+        # 1. zeroes the gradients
+        # optimizer.zero_grad() vs net.zero_grad()
+        # reference: https://discuss.pytorch.org/t/model-zero-grad-or-optimizer-zero-grad/28426
+        net.zero_grad()
+        # 2. forward propagation
+        outputs, commitment_loss, _, _ = net(inputs)
+        # 3. compute loss
+        # note: the commitment loss has been multiplied by beta in the vq layer
+        loss = reconstruction_loss(outputs, inputs) + commitment_loss
+        # 4. backward propagation
+        loss.backward()
+        # 5. update parameters
+        optimizer.step()
+
+        running_loss += loss.item()
+        n += len(inputs)
+
+        if sampling:
+            sampling = False
+            # take the first RECONSTRUCTION_SIZE images for reconstruction testing
+            sample = inputs[:RECONSTRUCTION_SIZE]
+    
+    # reconstruction test
+    net.eval()
+    sampling = True
+    with torch.no_grad():
+        outputs, _, _, _ = net(sample)
+        torchvision.utils.save_image(outputs, RECONSTRUCTED_DIRPATH)
+    
+    # save the model
+    if (epoch + 1) % SAVE_INTERVAL == 0:
+        torch.save({
+            # since the currect epoch has been completed, save the next epoch
+            'epoch' : epoch + 1,
+            'net_state_dict' : net.state_dict(),
+            'optimizer_state_dict' : optimizer.state_dict(),
+        }, MODEL_DIRPATH + f'vqvae-model-epoch{epoch + 1}.pth')
+    
+    print(f"Training loss: {running_loss / n}", flush=True)
