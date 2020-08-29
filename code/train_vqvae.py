@@ -147,7 +147,6 @@ for epoch in range(next_epoch, EPOCH):
     
     # reconstruction test
     net.eval()
-    # sampling = True
     with torch.no_grad():
         outputs, _, _, _ = net(sample)
         # unnormalise
