@@ -139,9 +139,13 @@ for epoch in range(next_epoch, EPOCH):
     
     # reconstruction test
     net.eval()
-    sampling = True
+    # sampling = True
     with torch.no_grad():
         outputs, _, _, _ = net(sample)
+        # unnormalise
+        # reference: https://discuss.pytorch.org/t/understanding-transform-normalize/21730
+        sample = sample * 0.5 + 0.5
+        outputs = outputs * 0.5 + 0.5
         torchvision.utils.save_image(sample, RECONSTRUCTED_DIRPATH + f'vqvae_real_{epoch+1}.png')
         torchvision.utils.save_image(outputs, RECONSTRUCTED_DIRPATH + f'vqvae_reconstructed_{epoch+1}.png')
     
