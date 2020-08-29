@@ -42,7 +42,8 @@ class Encoder(nn.Module):
             # padding = (s(n - 1) - n + f) / 2
             # ((n - 1) -n + 3) / 2 = 1
             nn.Conv2d(in_channels=hidden_channels, out_channels=hidden_channels, kernel_size=3, stride=1, padding=1),
-            nn.ReLU()
+            # NOTE: we don't need relu activation function here because the first residual block has relu as its first layer
+            # nn.ReLU()
         ]
         layers += [
             # here, we create num_resblocks number of residual blocks

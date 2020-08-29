@@ -51,8 +51,9 @@ class Decoder(nn.Module):
             nn.ConvTranspose2d(in_channels=hidden_channels, out_channels=hidden_channels // 2, kernel_size=4, stride=2, padding=1),
             nn.ReLU(),
             # p = (2(in - 1) + 4 - 2in) / 2 = 1
-            nn.ConvTranspose2d(in_channels=hidden_channels//2, out_channels=out_channels, kernel_size=4, stride=2, padding=1),
-            nn.ReLU()
+            nn.ConvTranspose2d(in_channels=hidden_channels//2, out_channels=out_channels, kernel_size=4, stride=2, padding=1)
+            # NOTE: we don't relu activation function for the last convtranspose2d layer
+            # nn.ReLU()
         ]
         return nn.Sequential(*layers)
 
