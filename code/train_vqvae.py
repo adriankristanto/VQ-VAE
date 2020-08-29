@@ -130,6 +130,11 @@ for epoch in range(next_epoch, EPOCH):
         # 3. compute loss
         # note: the commitment loss has been multiplied by beta in the vq layer
         if multigpu:
+            # if we are using multiple gpus for training, there will be x number of loss returned as a tensor 
+            # instead of just a scalar
+            # where x is the number of gpus that we used for training
+            # this can cause an issue with the autograd
+            # therefore, we need to make it a scalar by taking the mean
             commitment_loss = torch.mean(commitment_loss)
         loss = reconstruction_loss(outputs, inputs) + commitment_loss
         # 4. backward propagation
