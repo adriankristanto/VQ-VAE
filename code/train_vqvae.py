@@ -95,6 +95,14 @@ SAVE_INTERVAL = 5
 # for reconstruction test
 RECONSTRUCTION_SIZE = 64
 
+def save_training_progress(epoch, net, optimizer, filename):
+    torch.save({
+        # since the currect epoch has been completed, save the next epoch
+        'epoch' : epoch + 1,
+        'net_state_dict' : net.state_dict(),
+        'optimizer_state_dict' : optimizer.state_dict(),
+    }, filename)
+
 next_epoch = 0
 if CONTINUE_TRAIN:
     checkpoint = torch.load(CONTINUE_TRAIN_NAME)
@@ -151,11 +159,9 @@ for epoch in range(next_epoch, EPOCH):
     
     # save the model
     if (epoch + 1) % SAVE_INTERVAL == 0:
-        torch.save({
-            # since the currect epoch has been completed, save the next epoch
-            'epoch' : epoch + 1,
-            'net_state_dict' : net.state_dict(),
-            'optimizer_state_dict' : optimizer.state_dict(),
-        }, MODEL_DIRPATH + f'vqvae-model-epoch{epoch + 1}.pth')
+        save_training_progress(epoch, net, optimizer, MODEL_DIRPATH + f'vqvae-model-epoch{epoch + 1}.pth')
     
     print(f"Training loss: {running_loss / n}", flush=True)
+
+# save the model
+save_training_progress(epoch, net, optimizer, MODEL_DIRPATH + f'vqvae-model-epoch{epoch + 1}.pth')
