@@ -187,3 +187,4 @@ if __name__ == "__main__":
     net = VectorQuantizerEMA(D=64, K=512)
     print(net)
     print(net(tensor)[0].shape)
+    print(net(tensor)[4].shape)

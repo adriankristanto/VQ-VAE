@@ -36,15 +36,15 @@ class VQVAE(nn.Module):
     def encode(self, x):
         x = self.encoder(x)
         x = self.pre_vq(x)
-        quantized, loss, perplexity, _, _, _ = self.vectorquantizer(x)
-        return quantized, loss, perplexity
+        quantized, loss, perplexity, _, latents, _ = self.vectorquantizer(x)
+        return quantized, loss, perplexity, latents
     
     def decode(self, x):
         x = self.decoder(x)
         return x
     
     def forward(self, x):
-        quantized, loss, perplexity = self.encode(x)
+        quantized, loss, perplexity, _ = self.encode(x)
         x = self.decode(quantized)
         return x, loss, perplexity, quantized
 
@@ -54,3 +54,4 @@ if __name__ == "__main__":
     outputs = net(x)
     print(outputs[0].shape)
     print(outputs[3].shape)
+    print(net.encode(x)[3].shape)
