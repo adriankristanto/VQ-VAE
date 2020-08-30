@@ -78,7 +78,7 @@ net.to(device)
 # this is the first loss term, which will be optimized by both the encoder and the decoder
 # the third loss term, which will be optimized by the encoder, will be returned by the vq layer
 # the second loss term will not be used here, as EMA update is used.
-reconstruction_loss = nn.MSELoss(reduction='sum')
+reconstruction_loss = nn.MSELoss()
 
 # 4. define the optimiser
 # the learning rate used in the original implementation by the author
