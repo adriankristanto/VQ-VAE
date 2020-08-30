@@ -113,7 +113,6 @@ if CONTINUE_TRAIN:
 # training loop
 for epoch in range(next_epoch, EPOCH):
     running_loss = 0.0
-    n = 0
 
     sample = None
     sampling = True
@@ -143,7 +142,6 @@ for epoch in range(next_epoch, EPOCH):
         optimizer.step()
 
         running_loss += loss.item()
-        n += len(inputs)
 
         if sampling:
             sampling = False
@@ -165,7 +163,7 @@ for epoch in range(next_epoch, EPOCH):
     if (epoch + 1) % SAVE_INTERVAL == 0:
         save_training_progress(epoch, net, optimizer, MODEL_DIRPATH + f'vqvae-model-epoch{epoch + 1}.pth')
     
-    print(f"Training loss: {running_loss / n}", flush=True)
+    print(f"Training loss: {running_loss / len(trainloader)}", flush=True)
 
 # save the model
 save_training_progress(epoch, net, optimizer, MODEL_DIRPATH + f'vqvae-model-epoch{epoch + 1}.pth')
