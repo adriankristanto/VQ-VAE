@@ -41,7 +41,7 @@ class Encoder(nn.Module):
             # here, we want to use the same padding to keep the output size the same as the input size
             # padding = (s(n - 1) - n + f) / 2
             # ((n - 1) -n + 3) / 2 = 1
-            nn.Conv2d(in_channels=hidden_channels, out_channels=hidden_channels, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(in_channels=hidden_channels, out_channels=hidden_channels, kernel_size=3, stride=1, padding=1)
             # NOTE: we don't need relu activation function here because the first residual block has relu as its first layer
             # nn.ReLU()
         ]
