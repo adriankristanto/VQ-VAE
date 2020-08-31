@@ -37,6 +37,7 @@ class VQVAE(nn.Module):
         x = self.encoder(x)
         x = self.pre_vq(x)
         quantized, loss, perplexity, _, latents, _ = self.vectorquantizer(x)
+        # the latents, which is the nearest_embedding_ids will be used to train the PixelCNN model
         return quantized, loss, perplexity, latents
     
     def decode(self, x):
