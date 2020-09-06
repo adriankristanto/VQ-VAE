@@ -97,7 +97,7 @@ CONTINUE_TRAIN_NAME = MODEL_DIRPATH + 'vqvae-model-epoch10.pth'
 EPOCH = 50
 SAVE_INTERVAL = 5
 # for reconstruction test
-RECONSTRUCTION_SIZE = 64
+RECONSTRUCTION_SIZE = 8
 
 def save_training_progress(epoch, net, optimizer, filename):
     torch.save({
