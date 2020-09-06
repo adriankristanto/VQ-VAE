@@ -115,9 +115,10 @@ if CONTINUE_TRAIN:
     next_epoch = checkpoint.get('epoch')
 
 # training loop
-trainloader = tqdm(trainloader)
 for epoch in range(next_epoch, EPOCH):
-    running_loss = 0.0
+    # running_loss = 0.0
+
+    trainloader = tqdm(trainloader)
 
     net.train()
     for i, train_data in enumerate(trainloader):
@@ -144,10 +145,9 @@ for epoch in range(next_epoch, EPOCH):
         # 5. update parameters
         optimizer.step()
 
-        running_loss += loss.item()
+        # running_loss += loss.item()
 
         trainloader.set_description((
-            f"epoch: {epoch+1}/{EPOCH}; "
             f"mse: {mse.item():.5f}; "
             f"latent: {commitment_loss.item():.5f}; "
             f"loss: {loss.item():.5f}"
@@ -170,7 +170,7 @@ for epoch in range(next_epoch, EPOCH):
     if (epoch + 1) % SAVE_INTERVAL == 0:
         save_training_progress(epoch, net, optimizer, MODEL_DIRPATH + f'vqvae-model-epoch{epoch + 1}.pth')
     
-    print(f"Training loss: {running_loss / len(trainloader)}", flush=True)
+    # print(f"Training loss: {running_loss / len(trainloader)}", flush=True)
 
 # save the model
 save_training_progress(epoch, net, optimizer, MODEL_DIRPATH + f'vqvae-model-epoch{epoch + 1}.pth')
