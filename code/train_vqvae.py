@@ -94,7 +94,7 @@ MODEL_DIRPATH = os.path.dirname(os.path.realpath(__file__)) + '/../saved_models/
 RECONSTRUCTED_DIRPATH = os.path.dirname(os.path.realpath(__file__)) + '/../reconstructed_images/'
 CONTINUE_TRAIN = False
 CONTINUE_TRAIN_NAME = MODEL_DIRPATH + 'vqvae-model-epoch10.pth'
-EPOCH = 200
+EPOCH = 50
 SAVE_INTERVAL = 5
 # for reconstruction test
 RECONSTRUCTION_SIZE = 64
