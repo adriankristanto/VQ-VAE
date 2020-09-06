@@ -148,6 +148,7 @@ for epoch in range(next_epoch, EPOCH):
         # running_loss += loss.item()
 
         trainloader.set_description((
+            f"epoch: {epoch+1}/{EPOCH}; "
             f"mse: {mse.item():.5f}; "
             f"latent: {commitment_loss.item():.5f}; "
             f"loss: {loss.item():.5f}"
