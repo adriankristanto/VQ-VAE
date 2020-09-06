@@ -52,7 +52,9 @@ class VectorQuantizerEMA(nn.Module):
 
         # create the embedding layer's weights
         # initialise the weights using randn
-        embedding_init = torch.randn(D, K)
+        # reference: https://stackoverflow.com/questions/44328530/how-to-get-a-uniform-distribution-in-a-range-r1-r2-in-pytorch
+        # where r1 = 1./K and r2 = -1./K
+        embedding_init = (1./K + 1./K) * torch.rand(D, K) - 1./K # torch.randn(D, K)
         # why use register_buffer? because we want to save the embedding weights, etc. into saved state
         # for training continuation
         # why not use nn.Embedding or register_parameter? here, we update the weights using EMA instead of the traditional update
@@ -89,10 +91,9 @@ class VectorQuantizerEMA(nn.Module):
         # print(x_flatten.shape) # torch.Size([16384, 64])
         # print(self.embedding.shape) # torch.Size([64, 512])
         distance = (
-            torch.sum(x_flatten ** 2, dim=1, keepdim=True) + # shape: torch.Size([16384, 1])
-            torch.sum(self.embedding ** 2, dim=0, keepdim=True) - # shape: torch.Size([1, 512])
-            # torch.Size([16384, 1]) + torch.Size([1, 512]), using python broadcasting: torch.Size([16384, 512]) + torch.Size([16384, 512])
-            2 * torch.matmul(x_flatten, self.embedding) # shape: torch.Size([16384, 512])
+            torch.sum(x_flatten ** 2, dim=1, keepdim=True) - # shape: torch.Size([16384, 1])
+            2 * torch.matmul(x_flatten, self.embedding) + # shape: torch.Size([16384, 512])
+            torch.sum(self.embedding ** 2, dim=0, keepdim=True) # shape: torch.Size([1, 512])
         )
         # print(distance.shape) # torch.Size([16384, 512])
         # compute the distance between each of the 16384 input vector and 512 embedding vectors
@@ -102,28 +103,44 @@ class VectorQuantizerEMA(nn.Module):
         nearest_embedding_ids = torch.argmin(distance, dim=1)
         # print(nearest_embedding.shape) # torch.Size([16384])
 
-        # get the nearest embedding vector from the nearest embedding indices that we obtained above
-        # for all 16384 indices, we get the corresponding vector from the look up operation,
-        # therefore, we get 16384 vectors of size 64, i.e. (16384, 64)
-        # then, we unflatten it to make the shape of the output == the shape of the input
-        quantized = self.quantize(nearest_embedding_ids).view(*x.shape)
-        # print(quantized.shape) # torch.Size([16, 32, 32, 64])
-
         # create one-hot encoding where each row represents an array of size 512
         # the encoding will be used for EMA calculation
         encodings = F.one_hot(nearest_embedding_ids, num_classes=self.K).type(x_flatten.dtype)
         # print(encodings.shape) # torch.Size([16384, 512])
+
+        # nearest_embedding_ids will be returned as the latent code
+        # therefore, it should have shape of batch_size x latent_height x latent_width
+        # for example, in VQ-VAE 1, nearest_embedding_ids would have the shape (batch_size, 32, 32)
+        # if we use the author's configuration.
+        # note that the fourth dimension should be 1, because this is just the indices
+        # when we do the embedding, each index will be mapped to a vector of size D
+        # therefore, the shape would be (batch_size, 32, 32, D) following the above example
+        nearest_embedding_ids = nearest_embedding_ids.view(*x.shape[:-1])
+
+        # get the nearest embedding vector from the nearest embedding indices that we obtained above
+        # for all 16384 indices, we get the corresponding vector from the look up operation,
+        # therefore, we get 16384 vectors of size 64, i.e. (16384, 64)
+        # then, we unflatten it to make the shape of the output == the shape of the input
+        quantized = self.quantize(nearest_embedding_ids)
+        # print(quantized.shape) # torch.Size([16, 32, 32, 64])
 
         # if currently training, update the weights via EMA calculation
         # according to the paper, there are 3 items that we need to update
         # NOTE: the EMA formula is 
         # gamma * previous_term + (1 - gamma) * the current term
         if self.training:
+
             # the first one is N, or the cluster size
             # NOTE: in the paper, n_i^(t) is the number of input vectors that are quantized into a specific 
             # embedding vector
             # essentially, the following is the number of input vectors represented by a specific embedding vector
-            self.cluster_size = self.cluster_size * self.gamma + (1 - self.gamma) * torch.sum(encodings, dim=0)
+            
+            # self.cluster_size = self.cluster_size * self.gamma + (1 - self.gamma) * torch.sum(encodings, dim=0)
+            # inplace methods to save memory
+            self.cluster_size.data.mul_(self.gamma).add_(
+                torch.sum(encodings, dim=0), alpha=1 - self.gamma
+            )
+            
             # print(torch.sum(encodings, dim=0).shape) # torch.Size([512])
             # torch.sum(encodings, dim=0) means how many input vectors correspond to each index out of 512
             # for example, if the second entry is 32, this means that out of 16384 input vectors, 32 of them are
@@ -137,7 +154,13 @@ class VectorQuantizerEMA(nn.Module):
             # however, this has not been normalised yet by the number of input vectors that is represented by the 
             # aforementioned embedding vector
             # essentially, the following is the new, unnormalised value of a specific embedding vector
-            self.embed_avg = self.embed_avg * self.gamma + (1 - self.gamma) * torch.matmul(x_flatten.transpose(0, 1), encodings)
+            
+            # self.embed_avg = self.embed_avg * self.gamma + (1 - self.gamma) * torch.matmul(x_flatten.transpose(0, 1), encodings)
+            # inplace operation to save memory
+            # NOTE: .data is important to prevent a backprop problem
+            self.embed_avg.data.mul_(self.gamma).add_(
+                torch.matmul(x_flatten.transpose(0, 1), encodings), alpha=1 - self.gamma
+            )
 
             # according to https://github.com/zalandoresearch/pytorch-vq-vae/blob/master/vq-vae.ipynb
             # the following is the laplace smoothing of the cluster size
@@ -147,8 +170,9 @@ class VectorQuantizerEMA(nn.Module):
                 (self.cluster_size + self.epsilon) / (n + self.K * self.epsilon) * n
             )
             
-            # final update: the weights of the embedding layers
-            self.embedding = self.embed_avg / cluster_size
+            # final update: the weights of the embedding layer
+            embedding_normalised = self.embed_avg / cluster_size.unsqueeze(0)
+            self.embedding.data.copy_(embedding_normalised)
             # print(self.embed_avg.shape) # torch.Size([64, 512])
             # print(cluster_size.shape) # torch.Size([512])
 
@@ -177,7 +201,7 @@ class VectorQuantizerEMA(nn.Module):
             encodings, 
             # reshaped following the original implementation
             # e.g. from 16384 to (16, 32, 32)
-            nearest_embedding_ids.view(*x.shape[:-1]), 
+            nearest_embedding_ids, 
             distance
         )
 
@@ -186,4 +210,4 @@ if __name__ == "__main__":
     net = VectorQuantizerEMA(D=64, K=512)
     print(net)
     print(net(tensor)[0].shape)
-    print(net(tensor)[4].shape)
+    # print(net(tensor)[4].shape)
