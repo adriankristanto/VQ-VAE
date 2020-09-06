@@ -157,7 +157,7 @@ for epoch in range(next_epoch, EPOCH):
             net.eval()
             sample = inputs[:RECONSTRUCTION_SIZE]
             with torch.no_grad():
-                outputs, _ = net(sample)
+                outputs, _, _, _ = net(sample)
             torchvision.utils.save_image(
                 torch.cat([sample, outputs], dim=0),
                 RECONSTRUCTED_DIRPATH + f"vqvae_{epoch+1}_{i}.png",
