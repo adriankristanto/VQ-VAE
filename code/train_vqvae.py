@@ -37,6 +37,7 @@ if 'saved_models' not in os.listdir(MAIN_DIR):
 # reference: https://github.com/jpowie01/DCGAN_CelebA/blob/master/dataset.py
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__)) + '/../data/'
 BATCH_SIZE = 128
+NUM_WORKERS = 2
 
 train_transform = transforms.Compose([
     # make image h == image w
@@ -49,7 +50,7 @@ train_transform = transforms.Compose([
 ])
 
 trainset = datasets.ImageFolder(root=ROOT_DIR, transform=train_transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
 
 print(f"""
 Total data: {len(trainset)}
