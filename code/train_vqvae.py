@@ -113,9 +113,9 @@ if __name__ == "__main__":
     CONTINUE_TRAIN = False
     CONTINUE_TRAIN_NAME = MODEL_DIRPATH + 'vqvae-model-epoch10.pth'
     EPOCH = 200
-    SAVE_INTERVAL = 20
+    SAVE_INTERVAL = 10
     # for reconstruction test
-    RECONSTRUCTION_SIZE = 8
+    RECONSTRUCTION_SIZE = 64
 
     def save_training_progress(epoch, net, optimizer, filename):
         torch.save({
@@ -180,7 +180,6 @@ if __name__ == "__main__":
                 torchvision.utils.save_image(
                     torch.cat([sample, outputs], dim=0),
                     RECONSTRUCTED_DIRPATH + f"vqvae_{epoch+1}_{i}.png",
-                    nrow=RECONSTRUCTION_SIZE,
                     normalize=True,
                     range=(-1, 1)
                 )
