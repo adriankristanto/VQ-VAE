@@ -43,6 +43,12 @@ class VQVAE(nn.Module):
     def decode(self, x):
         x = self.decoder(x)
         return x
+
+    def decode_latent(self, latents):
+        quantized = self.vectorquantizer.quantize(latents)
+        quantized = quantized.permute(0, 3, 1, 2).contiguous()
+        x = self.decode(quantized)
+        return x
     
     def forward(self, x):
         quantized, loss, perplexity, _ = self.encode(x)
