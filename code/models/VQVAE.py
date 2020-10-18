@@ -62,3 +62,8 @@ if __name__ == "__main__":
     print(outputs[0].shape)
     print(outputs[3].shape)
     print(net.encode(x)[3].shape)
+
+    x = torch.randn((1, 3, 32, 32))
+    q, l, _, latents = net.encode(x)
+    print(latents.shape)
+    print(net.decode_latent(latents).shape)
