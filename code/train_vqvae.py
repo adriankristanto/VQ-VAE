@@ -45,8 +45,11 @@ if __name__ == "__main__":
 
     train_transform = None
     trainset = None
+    in_channels = None
 
     if DATASET == 'celeba':
+        in_channels = 3
+
         train_transform = transforms.Compose([
             # make image h == image w
             # NOTE: original size = (218, 178)
@@ -60,6 +63,8 @@ if __name__ == "__main__":
         trainset = datasets.ImageFolder(root=ROOT_DIR + 'CelebA', transform=train_transform)
 
     elif DATASET == 'mnist':
+        in_channels = 1
+
         train_transform = transforms.Compose([
             transforms.Resize((32, 32)),
             transforms.ToTensor(),
@@ -76,7 +81,7 @@ if __name__ == "__main__":
 
     # 2. instantiate the model
     net = VQVAE(
-        in_channels=3,
+        in_channels=in_channels,
         hidden_channels=128,
         num_resblocks=2,
         res_channels=32,
