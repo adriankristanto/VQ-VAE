@@ -12,6 +12,8 @@ import torchvision.datasets as datasets
 from tqdm import tqdm
 from models.VQVAE import VQVAE
 
+DATASET = 'mnist'
+
 if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -41,17 +43,31 @@ if __name__ == "__main__":
     BATCH_SIZE = 128
     NUM_WORKERS = 2
 
-    train_transform = transforms.Compose([
-        # make image h == image w
-        # NOTE: original size = (218, 178)
-        transforms.CenterCrop((178, 178)),
-        # if the image is resized immediately without making h == w, the image can look distorted
-        transforms.Resize((128, 128)),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
+    train_transform = None
+    trainset = None
 
-    trainset = datasets.ImageFolder(root=ROOT_DIR, transform=train_transform)
+    if DATASET == 'celeba':
+        train_transform = transforms.Compose([
+            # make image h == image w
+            # NOTE: original size = (218, 178)
+            transforms.CenterCrop((178, 178)),
+            # if the image is resized immediately without making h == w, the image can look distorted
+            transforms.Resize((128, 128)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+        trainset = datasets.ImageFolder(root=ROOT_DIR + 'CelebA', transform=train_transform)
+
+    elif DATASET == 'mnist':
+        train_transform = transforms.Compose([
+            transforms.Resize((32, 32)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5,), (0.5,))
+        ])
+
+        trainset = datasets.MNIST(root=ROOT_DIR, download=True, transform=train_transform)
+
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
 
     print(f"""
@@ -96,8 +112,8 @@ if __name__ == "__main__":
     RECONSTRUCTED_DIRPATH = os.path.dirname(os.path.realpath(__file__)) + '/../reconstructed_images/'
     CONTINUE_TRAIN = False
     CONTINUE_TRAIN_NAME = MODEL_DIRPATH + 'vqvae-model-epoch10.pth'
-    EPOCH = 50
-    SAVE_INTERVAL = 5
+    EPOCH = 200
+    SAVE_INTERVAL = 20
     # for reconstruction test
     RECONSTRUCTION_SIZE = 8
 
@@ -156,7 +172,7 @@ if __name__ == "__main__":
                 f"loss: {loss.item():.5f}"
             ))
 
-            if i % 100 == 0:
+            if i % 469 == 0:
                 net.eval()
                 sample = inputs[:RECONSTRUCTION_SIZE]
                 with torch.no_grad():
