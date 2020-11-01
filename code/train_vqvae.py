@@ -72,6 +72,16 @@ if __name__ == "__main__":
         ])
 
         trainset = datasets.MNIST(root=ROOT_DIR, download=True, transform=train_transform)
+    
+    elif DATASET == 'cifar10':
+        in_channels = 3
+
+        train_transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+        trainset = datasets.CIFAR10(root=ROOT_DIR, train=True, transform=train_transform, download=True)
 
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
 
